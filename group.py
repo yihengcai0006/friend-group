@@ -88,3 +88,26 @@ if __name__ == "__main__":
 
     # Average age
     print("\nAverage age:", average_age(my_group))
+        # ---- Summary statistics using comprehension expressions ----
+
+    # maximum age
+    max_age = max(person["age"] for person in my_group.values())
+    print("\nMaximum age in group:", max_age)
+
+    # the average (mean) number of relations among members of the group
+    avg_relations = sum(len(p["connections"]) for p in my_group.values()) / len(my_group)
+    print("Average number of relation types per person:", avg_relations)
+
+    # he maximum age of people in the group that have at least one relation
+    max_age_with_relation = max(
+        (p["age"] for p in my_group.values() if len(p["connections"]) > 0),
+        default=None
+    )
+    print("Maximum age of people with at least one relation:", max_age_with_relation)
+
+    # [more advanced] the maximum age of people in the group that have at least one friend
+    max_age_with_friend = max(
+        (p["age"] for p in my_group.values() if "friend" in p["connections"] and p["connections"]["friend"]),
+        default=None
+    )
+    print("Maximum age of people with at least one friend:", max_age_with_friend)
