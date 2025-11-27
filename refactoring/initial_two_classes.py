@@ -18,31 +18,49 @@ class Group:
 
     def size(self):
         """Return how many people are in the group."""
-        pass
+        return len(self.members)
 
     def contains(self, name):
-        """Check whether the group contains a person with the given name.
-        Useful to throw errors if we try to add a person who already exists or forget someone.
-        """
+        """Check whether the group contains a person with the given name."""
         return any(member.name == name for member in self.members)
+
+    def _get_person(self, name):
+        """Return Person object by name (internal helper)."""
+        for member in self.members:
+            if member.name == name:
+                return member
+        raise ValueError(f"{name} is not in the group")
 
     def add_person(self, name, age, job):
         """Add a new person with the given characteristics to the group."""
-        self.members.append(Person(name, age, job))
+        if self.contains(name):
+            raise ValueError(f"{name} already exists in the group")
+        person = Person(name, age, job)
+        self.members.append(person)
+        self.connections[name] = {}
 
     def number_of_connections(self, name):
         """Find the number of connections that a person in the group has"""
-        pass
+        if name not in self.connections:
+            raise ValueError(f"{name} is not in the group")
+        return len(self.connections[name])
 
     def connect(self, name1, name2, relation, reciprocal=True):
         """Connect two given people in a particular way.
-        Optional reciprocal: If true, will add the relationship from name2 to name 1 as well
+        Optional reciprocal: If true, will add the relationship from name2 to name1 as well
         """
-        pass
+        if not self.contains(name1) or not self.contains(name2):
+            raise ValueError("Both people must exist in the group")
+        self.connections[name1][name2] = relation
+        if reciprocal:
+            self.connections[name2][name1] = relation
 
     def forget(self, name1, name2):
         """Remove the connection between two people."""
-        pass
+        if name1 in self.connections:
+            self.connections[name1].pop(name2, None)
+        if name2 in self.connections:
+            self.connections[name2].pop(name1, None)
 
     def average_age(self):
         """Compute the average age of the group's members."""
@@ -53,11 +71,22 @@ class Group:
 if __name__ == "__main__":
     # Start with an empty group...
     my_group = Group()
-    # ...then add the group members one by one...
+
+    # Add group members (same as Part 2)
     my_group.add_person("Jill", 26, "biologist")
-    # ...then their connections
+    my_group.add_person("Zalika", 28, "artist")
+    my_group.add_person("John", 27, "writer")
+    my_group.add_person("Nash", 34, "chef")
+
+    # Add connections (same as Part 2)
     my_group.connect("Jill", "Zalika", "friend")
-    # ... then forget Nash and John's connection
+    my_group.connect("Jill", "John", "partner")
+    my_group.connect("Nash", "John", "cousin")
+    my_group.connect("Nash", "Zalika", "landlord", reciprocal=False)
+    # If you want the reciprocal label for Zalika->Nash:
+    my_group.connect("Zalika", "Nash", "tenant", reciprocal=False)
+
+    # Forget Nash and John's connection
     my_group.forget("Nash", "John")
 
     assert my_group.contains("John"), "John should be in the group"
@@ -65,3 +94,4 @@ if __name__ == "__main__":
     assert my_group.average_age() == 28.75, "Average age of the group is incorrect!"
     assert my_group.number_of_connections("Nash") == 1, "Nash should only have one relation"
     print("All assertions have passed!")
+
